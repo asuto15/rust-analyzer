@@ -335,6 +335,38 @@ fn expr() {
     );
 }
 
+#[test]
+fn dyn_missing_trait_error() {
+    check(
+        TopEntryPoint::SourceFile,
+        "fn foo() -> dyn {}",
+        expect![[r#"
+            SOURCE_FILE
+              FN
+                FN_KW "fn"
+                WHITESPACE " "
+                NAME
+                  IDENT "foo"
+                PARAM_LIST
+                  L_PAREN "("
+                  R_PAREN ")"
+                WHITESPACE " "
+                RET_TYPE
+                  THIN_ARROW "->"
+                  WHITESPACE " "
+                  DYN_TRAIT_TYPE
+                    DYN_KW "dyn"
+                    WHITESPACE " "
+                    TYPE_BOUND_LIST
+                BLOCK_EXPR
+                  STMT_LIST
+                    L_CURLY "{"
+                    R_CURLY "}"
+            error 15: at least one trait is required for an object type
+        "#]],
+    );
+}
+
 #[track_caller]
 fn check(entry: TopEntryPoint, input: &str, expect: expect_test::Expect) {
     let (parsed, _errors) = super::parse(entry, input, crate::Edition::CURRENT);

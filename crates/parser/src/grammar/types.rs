@@ -295,8 +295,26 @@ fn dyn_trait_type(p: &mut Parser<'_>) {
     assert!(p.at(T![dyn]));
     let m = p.start();
     p.bump(T![dyn]);
+
+    // test_err dyn_missing_trait
+    // type A = dyn;
+    if !trait_bound_starts(p) {
+        p.error("at least one trait is required for an object type");
+    }
     generic_params::bounds_without_colon(p);
     m.complete(p, DYN_TRAIT_TYPE);
+}
+
+fn trait_bound_starts(p: &Parser<'_>) -> bool {
+    p.at(T!['('])
+        || crate::grammar::paths::is_use_path_start(p)
+        || p.at(T![for])
+        || p.at(T![fn])
+        || p.at(T![unsafe])
+        || p.at(T![extern])
+        || p.at(T![impl])
+        || p.at(T![dyn])
+        || p.at(T![Self])
 }
 
 // test dyn_trait_type_weak 2015
